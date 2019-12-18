@@ -1,16 +1,14 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.PlatformAbstractions;
-using Microsoft.OpenApi.Models;
 using Quartz.Impl.AdoJobStore;
 using Quartz.Impl.AdoJobStore.Common;
 using Serilog;
 using Serilog.Events;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
 namespace Host
 {
@@ -51,20 +49,8 @@ namespace Host
             //services.AddMvc();
             services.AddControllersWithViews().AddNewtonsoftJson();
 
-            services.AddSwaggerGen(options =>
-            {
-                options.SwaggerDoc("v1", new OpenApiInfo
-                {
-                    Version = "v1",
-                    Title = "MsSystem API"
-                });
-
-                //Determine base path for the application.  
-                var basePath = PlatformServices.Default.Application.ApplicationBasePath;
-                //Set the comments path for the swagger json and ui.  
-                var xmlPath = Path.Combine(basePath, "Host.xml");
-                options.IncludeXmlComments(xmlPath);
-            });
+            // Register the Swagger services
+            services.AddSwaggerDocument();
 
             services.AddSingleton(GetScheduler());
         }
@@ -79,6 +65,7 @@ namespace Host
 
             //app.UseMvc();
 
+            // Url重写中间件,不是api路由时跳到index.html
             app.Use(async (context, next) =>
             {
                 await next();
@@ -96,17 +83,18 @@ namespace Host
             app.UseDefaultFiles();
             app.UseStaticFiles();
 
-            //https://docs.microsoft.com/en-us/aspnet/core/security/cors?view=aspnetcore-3.0
-            app.UseCors("AllowSameDomain");
+            
 
-            app.UseSwagger();
-            app.UseSwaggerUI(c =>
-            {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "MsSystem API V1");
-            });
+
+            // Register the Swagger generator and the Swagger UI middlewares
+            app.UseOpenApi();
+            app.UseSwaggerUi3();
 
             app.UseRouting();
-            app.UseAuthorization();
+            //app.UseAuthorization();
+            //跨域配置
+            //https://docs.microsoft.com/zh-cn/aspnet/core/security/cors?view=aspnetcore-3.1
+            app.UseCors();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

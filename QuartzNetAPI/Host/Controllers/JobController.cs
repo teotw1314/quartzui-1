@@ -11,7 +11,6 @@ namespace Host.Controllers
     /// 任务调度
     /// </summary>
     [Route("api/[controller]/[Action]")]
-    [EnableCors("AllowSameDomain")] //允许跨域 
     public class JobController : Controller
     {
         private SchedulerCenter scheduler;

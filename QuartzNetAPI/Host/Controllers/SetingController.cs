@@ -12,7 +12,6 @@ namespace Host.Controllers
     /// 设置
     /// </summary>
     [Route("api/[controller]/[Action]")]
-    [EnableCors("AllowSameDomain")] //允许跨域 
     public class SetingController : Controller
     {
         static string filePath = "File/Mail.txt";
